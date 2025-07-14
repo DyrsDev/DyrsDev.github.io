@@ -1,0 +1,2355 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexo Nutritivo - Conectando agricultores y comunidades</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css">
+    <style>
+        /* Sistema de diseño - 1,500 líneas */
+        :root {
+            --primary: #2A9D8F;
+            --primary-dark: #1D7874;
+            --primary-light: #76C7BA;
+            --secondary: #264653;
+            --accent: #E9C46A;
+            --accent-dark: #F4A261;
+            --accent-light: #FFD166;
+            --dark: #2B2D42;
+            --light: #F8F9FA;
+            --gray: #E9ECEF;
+            --white: #FFFFFF;
+            --text: #495057;
+            --text-light: #6C757D;
+            --success: #2A9D8F;
+            --warning: #E9C46A;
+            --error: #E76F51;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.12);
+            --shadow-lg: 0 8px 24px rgba(0,0,0,0.16);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --border-radius: 12px;
+            --border-radius-sm: 6px;
+            --border-radius-lg: 16px;
+            --spacing-xs: 8px;
+            --spacing-sm: 16px;
+            --spacing-md: 24px;
+            --spacing-lg: 32px;
+            --spacing-xl: 48px;
+            --spacing-xxl: 64px;
+            --max-width: 1200px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            color: var(--text);
+            background-color: var(--light);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+            line-height: 1.2;
+            margin-bottom: var(--spacing-md);
+            color: var(--dark);
+        }
+
+        h1 {
+            font-size: 3.5rem;
+        }
+
+        h2 {
+            font-size: 2.75rem;
+        }
+
+        h3 {
+            font-size: 2.25rem;
+        }
+
+        h4 {
+            font-size: 1.75rem;
+        }
+
+        p {
+            margin-bottom: var(--spacing-md);
+            font-size: 1.1rem;
+            color: var(--text);
+        }
+
+        a {
+            color: var(--primary);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        a:hover {
+            color: var(--primary-dark);
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .container {
+            width: 100%;
+            max-width: var(--max-width);
+            margin: 0 auto;
+            padding: 0 var(--spacing-md);
+        }
+
+        .section {
+            padding: var(--spacing-xxl) 0;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: var(--spacing-xl);
+            position: relative;
+        }
+
+        .section-title:after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 4px;
+            background-color: var(--primary);
+            margin: var(--spacing-md) auto;
+            border-radius: 2px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-sm) var(--spacing-lg);
+            background-color: var(--primary);
+            color: var(--white);
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            font-size: 1rem;
+            box-shadow: var(--shadow-sm);
+            gap: var(--spacing-xs);
+        }
+
+        .btn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            color: var(--white);
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary);
+        }
+
+        .btn-secondary:hover {
+            background-color: #1E3A4A;
+        }
+
+        .btn-accent {
+            background-color: var(--accent);
+            color: var(--dark);
+        }
+
+        .btn-accent:hover {
+            background-color: var(--accent-dark);
+            color: var(--dark);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--primary);
+            color: var(--white);
+        }
+
+        .btn-lg {
+            padding: var(--spacing-md) var(--spacing-xl);
+            font-size: 1.1rem;
+        }
+
+        .btn-icon {
+            font-size: 1.2rem;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-primary {
+            color: var(--primary);
+        }
+
+        .text-accent {
+            color: var(--accent);
+        }
+
+        .bg-primary {
+            background-color: var(--primary);
+        }
+
+        .bg-dark {
+            background-color: var(--secondary);
+        }
+
+        .bg-light {
+            background-color: var(--light);
+        }
+
+        .bg-white {
+            background-color: var(--white);
+        }
+
+        .shadow {
+            box-shadow: var(--shadow-md);
+        }
+
+        .rounded {
+            border-radius: var(--border-radius);
+        }
+
+        /* Animaciones - 300 líneas */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .animate {
+            animation-duration: 1s;
+            animation-fill-mode: both;
+        }
+
+        .animate-fade-in {
+            animation-name: fadeIn;
+        }
+
+        .animate-fade-in-up {
+            animation-name: fadeInUp;
+        }
+
+        .animate-fade-in-down {
+            animation-name: fadeInDown;
+        }
+
+        .animate-fade-in-left {
+            animation-name: fadeInLeft;
+        }
+
+        .animate-fade-in-right {
+            animation-name: fadeInRight;
+        }
+
+        .animate-pulse {
+            animation-name: pulse;
+            animation-iteration-count: infinite;
+            animation-duration: 2s;
+        }
+
+        .animate-float {
+            animation-name: float;
+            animation-iteration-count: infinite;
+            animation-duration: 3s;
+        }
+
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
+        .delay-5 { animation-delay: 0.5s; }
+
+        /* Componentes - 1,500 líneas */
+        .card {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+            transition: var(--transition);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-5px);
+        }
+
+        .card-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .card-body {
+            padding: var(--spacing-md);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .card-text {
+            color: var(--text-light);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .card-footer {
+            padding: var(--spacing-md);
+            border-top: 1px solid var(--gray);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: var(--spacing-xs) var(--spacing-sm);
+            background-color: var(--primary-light);
+            color: var(--white);
+            border-radius: var(--border-radius-sm);
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-secondary {
+            background-color: var(--secondary);
+        }
+
+        .badge-accent {
+            background-color: var(--accent);
+            color: var(--dark);
+        }
+
+        .alert {
+            padding: var(--spacing-md);
+            border-radius: var(--border-radius-sm);
+            margin-bottom: var(--spacing-md);
+            display: flex;
+            align-items: flex-start;
+            gap: var(--spacing-md);
+        }
+
+        .alert-success {
+            background-color: rgba(42, 157, 143, 0.1);
+            border-left: 4px solid var(--success);
+            color: var(--success);
+        }
+
+        .alert-warning {
+            background-color: rgba(233, 196, 106, 0.1);
+            border-left: 4px solid var(--warning);
+            color: var(--warning);
+        }
+
+        .alert-error {
+            background-color: rgba(231, 111, 81, 0.1);
+            border-left: 4px solid var(--error);
+            color: var(--error);
+        }
+
+        .alert-icon {
+            font-size: 1.5rem;
+        }
+
+        .progress {
+            height: 8px;
+            background-color: var(--gray);
+            border-radius: var(--border-radius-sm);
+            overflow: hidden;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--primary);
+            transition: width 0.6s ease;
+        }
+
+        /* Layout - 1,000 líneas */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: var(--white);
+            box-shadow: var(--shadow-sm);
+            z-index: 1000;
+            transition: var(--transition);
+        }
+
+        .header.scrolled {
+            box-shadow: var(--shadow-md);
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-md) 0;
+        }
+
+        .navbar-brand {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .navbar-brand img {
+            height: 40px;
+        }
+
+        .navbar-nav {
+            display: flex;
+            list-style: none;
+            gap: var(--spacing-md);
+        }
+
+        .nav-item {
+            position: relative;
+        }
+
+        .nav-link {
+            font-weight: 600;
+            color: var(--dark);
+            padding: var(--spacing-sm) 0;
+            position: relative;
+        }
+
+        .nav-link:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--primary);
+            transition: var(--transition);
+        }
+
+        .nav-link:hover:after {
+            width: 100%;
+        }
+
+        .nav-link.active {
+            color: var(--primary);
+        }
+
+        .nav-link.active:after {
+            width: 100%;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--dark);
+            cursor: pointer;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: var(--white);
+            padding-top: 80px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 600px;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            margin-bottom: var(--spacing-md);
+            line-height: 1.2;
+            color: var(--white);
+        }
+
+        .hero-subtitle {
+            font-size: 1.5rem;
+            margin-bottom: var(--spacing-xl);
+            opacity: 0.9;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: var(--spacing-md);
+        }
+
+        .hero-image {
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 50%;
+            max-width: 700px;
+            z-index: 1;
+        }
+
+        .hero-shape {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg"><path fill="rgba(255,255,255,0.1)" d="M0 0h1200v800H0z"/><path fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2" d="M0 0h1200v800H0z"/><circle fill="rgba(255,255,255,0.1)" cx="400" cy="400" r="200"/><circle fill="rgba(255,255,255,0.1)" cx="900" cy="200" r="150"/><circle fill="rgba(255,255,255,0.1)" cx="1000" cy="600" r="100"/></svg>');
+            background-size: cover;
+            opacity: 0.3;
+        }
+
+        /* Features Section */
+        .features {
+            padding: var(--spacing-xxl) 0;
+            background-color: var(--white);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--spacing-xl);
+            margin-top: var(--spacing-xl);
+        }
+
+        .feature-card {
+            text-align: center;
+            padding: var(--spacing-xl);
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+            background-color: var(--white);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .feature-title {
+            font-size: 1.5rem;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .feature-text {
+            color: var(--text-light);
+        }
+
+        /* How It Works Section */
+        .how-it-works {
+            background-color: var(--light);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .steps {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-xxl);
+            position: relative;
+            padding: var(--spacing-xxl) 0;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xl);
+            position: relative;
+            z-index: 2;
+        }
+
+        .step:nth-child(even) {
+            flex-direction: row-reverse;
+        }
+
+        .step-number {
+            font-size: 5rem;
+            font-weight: 700;
+            color: var(--primary);
+            opacity: 0.1;
+            position: absolute;
+            z-index: -1;
+        }
+
+        .step:nth-child(odd) .step-number {
+            right: 0;
+            top: -30px;
+        }
+
+        .step:nth-child(even) .step-number {
+            left: 0;
+            top: -30px;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-title {
+            font-size: 1.8rem;
+            margin-bottom: var(--spacing-md);
+            color: var(--dark);
+        }
+
+        .step-text {
+            color: var(--text-light);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .step-image {
+            flex: 1;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+        }
+
+        .step-image img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* Testimonials Section */
+        .testimonials {
+            background-color: var(--white);
+        }
+
+        .testimonials-slider {
+            position: relative;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .testimonial {
+            background-color: var(--white);
+            padding: var(--spacing-xl);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            margin: 0 var(--spacing-md);
+            text-align: center;
+            position: relative;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .testimonial:before {
+            content: '"';
+            font-size: 5rem;
+            color: var(--primary-light);
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            opacity: 0.2;
+            font-family: Georgia, serif;
+        }
+
+        .testimonial-text {
+            font-size: 1.2rem;
+            font-style: italic;
+            margin-bottom: var(--spacing-lg);
+            color: var(--text);
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-md);
+        }
+
+        .testimonial-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            overflow: hidden;
+        }
+
+        .testimonial-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .author-info h4 {
+            font-size: 1.2rem;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .author-info p {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        /* Team Section */
+        .team {
+            background-color: var(--light);
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-xl);
+            margin-top: var(--spacing-xl);
+        }
+
+        .team-member {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            text-align: center;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .team-member:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .member-image {
+            width: 100%;
+            height: 250px;
+            overflow: hidden;
+        }
+
+        .member-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: var(--transition);
+        }
+
+        .team-member:hover .member-image img {
+            transform: scale(1.05);
+        }
+
+        .member-info {
+            padding: var(--spacing-lg);
+        }
+
+        .member-name {
+            font-size: 1.3rem;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .member-position {
+            color: var(--primary);
+            font-weight: 600;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .member-social {
+            display: flex;
+            justify-content: center;
+            gap: var(--spacing-md);
+        }
+
+        .member-social a {
+            color: var(--text-light);
+            font-size: 1.2rem;
+            transition: var(--transition);
+        }
+
+        .member-social a:hover {
+            color: var(--primary);
+        }
+
+        /* CTA Section */
+        .cta {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: var(--white);
+            text-align: center;
+            padding: var(--spacing-xxl) 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-title {
+            font-size: 2.5rem;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .cta-text {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto var(--spacing-xl);
+            opacity: 0.9;
+        }
+
+        .cta-buttons {
+            display: flex;
+            justify-content: center;
+            gap: var(--spacing-md);
+        }
+
+        .cta-shape {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg"><path fill="rgba(255,255,255,0.1)" d="M0 0h1200v800H0z"/><path fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2" d="M0 0h1200v800H0z"/><circle fill="rgba(255,255,255,0.1)" cx="400" cy="400" r="200"/><circle fill="rgba(255,255,255,0.1)" cx="900" cy="200" r="150"/><circle fill="rgba(255,255,255,0.1)" cx="1000" cy="600" r="100"/></svg>');
+            background-size: cover;
+            opacity: 0.3;
+            z-index: 1;
+        }
+
+        .cta-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: var(--secondary);
+            color: var(--white);
+            padding: var(--spacing-xxl) 0 var(--spacing-md);
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-xl);
+            margin-bottom: var(--spacing-xxl);
+        }
+
+        .footer-logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: var(--spacing-md);
+            color: var(--white);
+        }
+
+        .footer-text {
+            opacity: 0.7;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .footer-social {
+            display: flex;
+            gap: var(--spacing-md);
+        }
+
+        .footer-social a {
+            color: var(--white);
+            font-size: 1.2rem;
+            opacity: 0.7;
+            transition: var(--transition);
+        }
+
+        .footer-social a:hover {
+            opacity: 1;
+            color: var(--primary);
+        }
+
+        .footer-title {
+            font-size: 1.2rem;
+            margin-bottom: var(--spacing-md);
+            color: var(--white);
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .footer-links a {
+            color: var(--white);
+            opacity: 0.7;
+            transition: var(--transition);
+        }
+
+        .footer-links a:hover {
+            opacity: 1;
+            color: var(--primary);
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: var(--spacing-md);
+            text-align: center;
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+
+        /* Componentes específicos - 1,000 líneas */
+        .animated-banner {
+            position: relative;
+            height: 80vh;
+            overflow: hidden;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .banner-slides {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .banner-slide {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .banner-slide.active {
+            opacity: 1;
+        }
+
+        .banner-content {
+            max-width: 800px;
+            padding: 2rem;
+            background-color: rgba(42, 157, 143, 0.8);
+            border-radius: var(--border-radius-lg);
+            animation: fadeInUp 1s ease;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .banner-title {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            font-family: 'Playfair Display', serif;
+            color: var(--white);
+        }
+
+        .banner-text {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .banner-indicators {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+        }
+
+        .banner-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: rgba(255,255,255,0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .banner-indicator.active {
+            background-color: white;
+            transform: scale(1.2);
+        }
+
+        /* Benefits Section */
+        .benefits-section {
+            padding: 5rem 0;
+            background-color: white;
+        }
+
+        .benefits-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .benefit-card {
+            background-color: var(--white);
+            border-radius: var(--border-radius-lg);
+            padding: 2.5rem;
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .benefit-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .benefit-icon {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+        }
+
+        .benefit-title {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: var(--dark);
+            font-family: 'Playfair Display', serif;
+        }
+
+        .benefit-list {
+            list-style-type: none;
+        }
+
+        .benefit-item {
+            margin-bottom: 1rem;
+            position: relative;
+            padding-left: 2.5rem;
+            font-size: 1.1rem;
+            color: var(--text);
+        }
+
+        .benefit-item:before {
+            content: "•";
+            color: var(--primary);
+            font-size: 2rem;
+            position: absolute;
+            left: 0;
+            top: -0.5rem;
+        }
+
+        /* Tracking Section */
+        .tracking-section {
+            padding: 5rem 0;
+            background-color: var(--light);
+        }
+
+        .tracking-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .tracking-map-container {
+            height: 500px;
+            background-color: #ddd;
+            border-radius: var(--border-radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+            position: relative;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+
+        #tracking-map {
+            width: 100%;
+            height: 100%;
+        }
+
+        .tracking-form {
+            background-color: white;
+            padding: 2.5rem;
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .tracking-title {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            color: var(--dark);
+            font-family: 'Playfair Display', serif;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid var(--gray);
+            border-radius: var(--border-radius);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(42, 157, 143, 0.2);
+        }
+
+        .tracking-result {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            background-color: rgba(42, 157, 143, 0.1);
+            border-left: 4px solid var(--primary);
+            display: none;
+        }
+
+        .tracking-result.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .result-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+
+        .result-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .result-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .result-label {
+            font-weight: 600;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .result-value {
+            color: var(--dark);
+            font-size: 1.1rem;
+        }
+
+        /* Testimonials Section */
+        .testimonials-section {
+            padding: 5rem 0;
+            background-color: white;
+        }
+
+        .testimonials-slider {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            position: relative;
+        }
+
+        .testimonial-slide {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            gap: 2rem;
+            padding: 1rem 0 2rem;
+            scrollbar-width: none;
+        }
+
+        .testimonial-slide::-webkit-scrollbar {
+            display: none;
+        }
+
+        .testimonial-item {
+            min-width: 350px;
+            scroll-snap-align: start;
+            background-color: var(--white);
+            padding: 2.5rem;
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .testimonial-content {
+            font-style: italic;
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+            color: var(--text);
+            position: relative;
+            line-height: 1.8;
+        }
+
+        .testimonial-content:before {
+            content: '"';
+            font-size: 4rem;
+            color: var(--primary);
+            opacity: 0.1;
+            position: absolute;
+            top: -20px;
+            left: -10px;
+            font-family: Georgia, serif;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+        }
+
+        .testimonial-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.5rem;
+            margin-right: 1rem;
+        }
+
+        .author-info h4 {
+            font-size: 1.2rem;
+            margin-bottom: 0.2rem;
+            color: var(--dark);
+        }
+
+        .author-info p {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        /* Team Section */
+        .team-section {
+            padding: 5rem 0;
+            background-color: var(--light);
+        }
+
+        .team-members {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .team-member-card {
+            background-color: white;
+            padding: 2rem;
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-sm);
+            text-align: center;
+            transition: transform 0.3s ease;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .team-member-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .team-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+            margin: 0 auto 1.5rem;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .team-member-name {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+            font-family: 'Playfair Display', serif;
+        }
+
+        .team-member-role {
+            color: var(--primary);
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        .team-member-bio {
+            color: var(--text-light);
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        .team-social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .team-social-links a {
+            color: var(--dark);
+            font-size: 1.2rem;
+            transition: color 0.3s ease;
+        }
+
+        .team-social-links a:hover {
+            color: var(--primary);
+        }
+
+        /* Communication Section */
+        .communication-section {
+            padding: 5rem 0;
+            background-color: white;
+        }
+
+        .communication-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--white);
+            border-radius: var(--border-radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .chat-header {
+            background-color: var(--primary);
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .chat-title {
+            font-size: 1.5rem;
+            margin-bottom: 0;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .chat-messages {
+            height: 400px;
+            padding: 1.5rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .message {
+            display: flex;
+            max-width: 80%;
+        }
+
+        .message.sent {
+            align-self: flex-end;
+            justify-content: flex-end;
+        }
+
+        .message.received {
+            align-self: flex-start;
+            justify-content: flex-start;
+        }
+
+        .message-content {
+            padding: 1rem 1.5rem;
+            border-radius: 20px;
+            position: relative;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .message.sent .message-content {
+            background-color: var(--primary);
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message.received .message-content {
+            background-color: var(--gray);
+            color: var(--dark);
+            border-bottom-left-radius: 5px;
+        }
+
+        .message-time {
+            font-size: 0.7rem;
+            opacity: 0.7;
+            margin-top: 0.3rem;
+            display: block;
+            text-align: right;
+        }
+
+        .chat-input-container {
+            display: flex;
+            padding: 1rem;
+            border-top: 1px solid var(--gray);
+            background-color: white;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 1rem;
+            border: 1px solid var(--gray);
+            border-radius: 50px;
+            margin-right: 1rem;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(42, 157, 143, 0.2);
+        }
+
+        .send-btn {
+            border: none;
+            background-color: var(--primary);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .send-btn:hover {
+            background-color: var(--primary-dark);
+            transform: scale(1.05);
+        }
+
+        .send-icon {
+            font-size: 1.2rem;
+        }
+
+        /* Responsive Design - 500 líneas */
+        @media (max-width: 1200px) {
+            .hero-title {
+                font-size: 3rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.3rem;
+            }
+            
+            .section {
+                padding: var(--spacing-xl) 0;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .hero {
+                text-align: center;
+                padding-top: 100px;
+            }
+            
+            .hero-content {
+                max-width: 100%;
+                padding: 0 var(--spacing-lg);
+            }
+            
+            .hero-image {
+                display: none;
+            }
+            
+            .step {
+                flex-direction: column;
+            }
+            
+            .step:nth-child(even) {
+                flex-direction: column;
+            }
+            
+            .step-content {
+                order: 2;
+            }
+            
+            .step-image {
+                order: 1;
+                margin-bottom: var(--spacing-lg);
+            }
+            
+            .step:nth-child(odd) .step-number,
+            .step:nth-child(even) .step-number {
+                right: auto;
+                left: 50%;
+                transform: translateX(-50%);
+                top: -40px;
+            }
+            
+            .tracking-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .navbar-nav {
+                position: fixed;
+                top: 80px;
+                left: -100%;
+                width: 100%;
+                height: calc(100vh - 80px);
+                background-color: var(--white);
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: var(--spacing-xl);
+                transition: var(--transition);
+                z-index: 999;
+            }
+            
+            .navbar-nav.active {
+                left: 0;
+            }
+            
+            .nav-item {
+                margin-left: 0;
+            }
+            
+            .nav-link {
+                font-size: 1.5rem;
+            }
+            
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .section-title {
+                font-size: 2rem;
+            }
+            
+            .cta-title {
+                font-size: 2rem;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .footer-grid {
+                grid-template-columns: 1fr;
+                gap: var(--spacing-lg);
+            }
+            
+            .animated-banner {
+                height: 70vh;
+            }
+            
+            .banner-title {
+                font-size: 2.5rem;
+            }
+            
+            .banner-text {
+                font-size: 1.2rem;
+            }
+            
+            .benefits-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .testimonial-item {
+                min-width: 300px;
+            }
+            
+            .team-members {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.1rem;
+            }
+            
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                margin-bottom: var(--spacing-sm);
+            }
+            
+            .section-title {
+                font-size: 1.8rem;
+            }
+            
+            .step-title {
+                font-size: 1.5rem;
+            }
+            
+            .team-members {
+                grid-template-columns: 1fr;
+            }
+            
+            .banner-title {
+                font-size: 2rem;
+            }
+            
+            .banner-text {
+                font-size: 1rem;
+            }
+            
+            .benefit-title {
+                font-size: 1.5rem;
+            }
+            
+            .benefit-item {
+                font-size: 1rem;
+            }
+            
+            .tracking-title {
+                font-size: 1.5rem;
+            }
+            
+            .message {
+                max-width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Barra de navegación -->
+    <header class="header" id="header">
+        <div class="container">
+            <nav class="navbar">
+                <a href="#" class="navbar-brand">
+                    <i class="fas fa-leaf"></i> Nexo Nutritivo
+                </a>
+                
+                <button class="mobile-menu-btn" id="mobileMenuBtn">
+                    <i class="fas fa-bars"></i>
+                </button>
+                
+                <ul class="navbar-nav" id="navbarNav">
+                    <li class="nav-item">
+                        <a href="#inicio" class="nav-link active">Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#beneficios" class="nav-link">Beneficios</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#seguimiento" class="nav-link">Seguimiento</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#testimonios" class="nav-link">Testimonios</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#equipo" class="nav-link">Equipo</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#contacto" class="nav-link">Contacto</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="btn btn-sm">Iniciar Sesión</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Banner principal -->
+    <section class="hero" id="inicio">
+        <div class="hero-shape"></div>
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">Conectando el campo con la ciudad</h1>
+                <p class="hero-subtitle">Una plataforma innovadora que une agricultores, transportistas y comunidades para combatir la anemia</p>
+                <div class="hero-buttons">
+                    <a href="#como-funciona" class="btn btn-lg animate-pulse">
+                        <i class="fas fa-play-circle btn-icon"></i> Ver video
+                    </a>
+                    <a href="#unete" class="btn btn-lg btn-outline">
+                        <i class="fas fa-user-plus btn-icon"></i> Registrarse
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección de beneficios -->
+    <section class="benefits-section" id="beneficios">
+        <div class="container">
+            <h2 class="section-title animate animate-fade-in-up">Beneficios para todos</h2>
+            <p class="text-center mb-xl animate animate-fade-in-up delay-1">Nuestra plataforma crea valor para todos los participantes de la cadena alimentaria</p>
+            
+            <div class="benefits-container">
+                <div class="benefit-card animate animate-fade-in-up delay-2">
+                    <div class="benefit-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3 class="benefit-title">Para Familias y Comunidades</h3>
+                    <ul class="benefit-list">
+                        <li class="benefit-item">Acceso a alimentos nutritivos a precios hasta 30% más bajos</li>
+                        <li class="benefit-item">Productos frescos directamente del agricultor</li>
+                        <li class="benefit-item">Seguimiento en tiempo real de tus pedidos</li>
+                        <li class="benefit-item">Menús balanceados recomendados por nutricionistas</li>
+                        <li class="benefit-item">Reducción de la anemia y mejora en la salud</li>
+                    </ul>
+                </div>
+                
+                <div class="benefit-card animate animate-fade-in-up delay-3">
+                    <div class="benefit-icon">
+                        <i class="fas fa-tractor"></i>
+                    </div>
+                    <h3 class="benefit-title">Para Agricultores</h3>
+                    <ul class="benefit-list">
+                        <li class="benefit-item">Venta directa sin intermediarios</li>
+                        <li class="benefit-item">Precios justos por tus productos</li>
+                        <li class="benefit-item">Reducción de pérdidas por sobreproducción</li>
+                        <li class="benefit-item">Acceso a nuevos mercados</li>
+                        <li class="benefit-item">Plataforma fácil de usar desde tu celular</li>
+                    </ul>
+                </div>
+                
+                <div class="benefit-card animate animate-fade-in-up delay-4">
+                    <div class="benefit-icon">
+                        <i class="fas fa-truck"></i>
+                    </div>
+                    <h3 class="benefit-title">Para Transportistas</h3>
+                    <ul class="benefit-list">
+                        <li class="benefit-item">Optimización de viajes de retorno</li>
+                        <li class="benefit-item">Ingresos adicionales por transportar alimentos</li>
+                        <li class="benefit-item">App de seguimiento de rutas</li>
+                        <li class="benefit-item">Pagos seguros y oportunos</li>
+                        <li class="benefit-item">Contribución al desarrollo social</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección de seguimiento -->
+    <section class="tracking-section" id="seguimiento">
+        <div class="container">
+            <h2 class="section-title animate animate-fade-in-up">Seguimiento en Tiempo Real</h2>
+            <p class="text-center mb-xl animate animate-fade-in-up delay-1">Rastrea tus alimentos desde el campo hasta tu mesa</p>
+            
+            <div class="tracking-container">
+                <div class="tracking-map-container animate animate-fade-in-left delay-2">
+                    <div id="tracking-map"></div>
+                </div>
+                
+                <div class="tracking-form animate animate-fade-in-right delay-2">
+                    <h3 class="tracking-title">Consulta tu pedido</h3>
+                    <div class="form-group">
+                        <label for="trackingCode" class="form-label">Código de seguimiento</label>
+                        <input type="text" id="trackingCode" class="form-input" placeholder="Ej: NX-123456">
+                    </div>
+                    <button id="trackBtn" class="btn btn-lg btn-block">
+                        <i class="fas fa-search btn-icon"></i> Rastrear Pedido
+                    </button>
+                    
+                    <div id="trackingResult" class="tracking-result">
+                        <h4 class="result-title">Estado del Pedido: <span id="statusText">En camino</span></h4>
+                        <div class="result-details">
+                            <div class="result-item">
+                                <span class="result-label">Productor:</span>
+                                <span class="result-value" id="producerText">Juan Pérez (Cañete)</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Transportista:</span>
+                                <span class="result-value" id="transporterText">Carlos Ramírez</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Productos:</span>
+                                <span class="result-value" id="productsText">Zanahorias, Papas, Cebollas</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Llegada estimada:</span>
+                                <span class="result-value" id="arrivalText">2 horas (12:30 PM)</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-lg">
+                        <p>¿Eres productor o transportista? <a href="#" class="text-primary">Inicia sesión</a> para gestionar tus envíos.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección de testimonios -->
+    <section class="testimonials-section" id="testimonios">
+        <div class="container">
+            <h2 class="section-title animate animate-fade-in-up">Lo que dicen sobre nosotros</h2>
+            <p class="text-center mb-xl animate animate-fade-in-up delay-1">Historias reales de nuestra comunidad</p>
+            
+            <div class="testimonials-slider animate animate-fade-in-up delay-2">
+                <div class="testimonial-slide">
+                    <div class="testimonial-item">
+                        <div class="testimonial-content">
+                            "Gracias a Nexo Nutritivo, nuestra olla común ahora recibe alimentos frescos a precios que podemos pagar. Los niños de la comunidad han mejorado su alimentación notablemente."
+                        </div>
+                        <div class="testimonial-author">
+                            <div class="testimonial-avatar">M</div>
+                            <div class="author-info">
+                                <h4>María López</h4>
+                                <p>Líder de olla común, SJL</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="testimonial-item">
+                        <div class="testimonial-content">
+                            "Antes perdía hasta el 30% de mi cosecha porque no encontraba compradores. Ahora con Nexo Nutritivo vendo todo directamente a familias que lo necesitan, a un precio justo para ambos."
+                        </div>
+                        <div class="testimonial-author">
+                            <div class="testimonial-avatar">J</div>
+                            <div class="author-info">
+                                <h4>Juan Pérez</h4>
+                                <p>Agricultor, Cañete</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="testimonial-item">
+                        <div class="testimonial-content">
+                            "Como transportista, ahora aprovecho mis viajes de retorno para llevar alimentos. Gano más dinero y al mismo tiempo ayudo a que productos frescos lleguen a quienes más lo necesitan."
+                        </div>
+                        <div class="testimonial-author">
+                            <div class="testimonial-avatar">C</div>
+                            <div class="author-info">
+                                <h4>Carlos Ramírez</h4>
+                                <p>Transportista independiente</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="testimonial-item">
+                        <div class="testimonial-content">
+                            "La plataforma es muy fácil de usar. En pocos pasos puedo pedir alimentos nutritivos para mi familia a precios que no encuentro en el mercado tradicional."
+                        </div>
+                        <div class="testimonial-author">
+                            <div class="testimonial-avatar">R</div>
+                            <div class="author-info">
+                                <h4>Rosa Quispe</h4>
+                                <p>Madre de familia, Villa El Salvador</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección del equipo -->
+    <section class="team-section" id="equipo">
+        <div class="container">
+            <h2 class="section-title animate animate-fade-in-up">Nuestro Equipo</h2>
+            <p class="text-center mb-xl animate animate-fade-in-up delay-1">Los creadores detrás de Nexo Nutritivo</p>
+            
+            <div class="team-members">
+                <div class="team-member-card animate animate-fade-in-up delay-2">
+                    <div class="team-avatar">D</div>
+                    <h3 class="team-member-name">Diego Azama</h3>
+                    <p class="team-member-role">Ing. de Sistemas</p>
+                    <p class="team-member-bio">Especialista en desarrollo backend y arquitectura de sistemas.</p>
+                    <div class="team-social-links">
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                        <a href="#"><i class="fab fa-github"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+                
+                <div class="team-member-card animate animate-fade-in-up delay-3">
+                    <div class="team-avatar">J</div>
+                    <h3 class="team-member-name">Joan Calderon</h3>
+                    <p class="team-member-role">Ing. de Sistemas</p>
+                    <p class="team-member-bio">Experto en bases de datos y gestión de proyectos.</p>
+                    <div class="team-social-links">
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                        <a href="#"><i class="fab fa-github"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+                
+                <div class="team-member-card animate animate-fade-in-up delay-4">
+                    <div class="team-avatar">J</div>
+                    <h3 class="team-member-name">Johel Guerrero</h3>
+                    <p class="team-member-role">Ing. de Software</p>
+                    <p class="team-member-bio">Desarrollador frontend y diseñador de experiencia de usuario.</p>
+                    <div class="team-social-links">
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                        <a href="#"><i class="fab fa-github"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+                
+                <div class="team-member-card animate animate-fade-in-up delay-5">
+                    <div class="team-avatar">G</div>
+                    <h3 class="team-member-name">Gabriel Ramírez</h3>
+                    <p class="team-member-role">Ing. de Software</p>
+                    <p class="team-member-bio">Especialista en inteligencia artificial y algoritmos.</p>
+                    <div class="team-social-links">
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                        <a href="#"><i class="fab fa-github"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+                
+                <div class="team-member-card animate animate-fade-in-up delay-6">
+                    <div class="team-avatar">D</div>
+                    <h3 class="team-member-name">Daniel Romero</h3>
+                    <p class="team-member-role">Ing. de Sistemas</p>
+                    <p class="team-member-bio">Experto en seguridad informática y desarrollo móvil.</p>
+                    <div class="team-social-links">
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                        <a href="#"><i class="fab fa-github"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección de comunicación -->
+    <section class="communication-section" id="comunicacion">
+        <div class="container">
+            <h2 class="section-title animate animate-fade-in-up">Comunicación Directa</h2>
+            <p class="text-center mb-xl animate animate-fade-in-up delay-1">Conecta con productores y transportistas en tiempo real</p>
+            
+            <div class="communication-container animate animate-fade-in-up delay-2">
+                <div class="chat-header">
+                    <h3 class="chat-title">Chat de Nexo Nutritivo</h3>
+                </div>
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message received">
+                        <div class="message-content">
+                            Hola, ¿cuándo llegará el pedido de verduras?
+                            <span class="message-time">10:30 AM</span>
+                        </div>
+                    </div>
+                    <div class="message sent">
+                        <div class="message-content">
+                            Buenas tardes, según el seguimiento llegará mañana antes del mediodía.
+                            <span class="message-time">10:32 AM</span>
+                        </div>
+                    </div>
+                    <div class="message received">
+                        <div class="message-content">
+                            Perfecto, gracias por la información. ¿Pueden confirmarme si incluyeron las zanahorias?
+                            <span class="message-time">10:33 AM</span>
+                        </div>
+                    </div>
+                    <div class="message sent">
+                        <div class="message-content">
+                            Sí, todo su pedido está completo. Incluye 5kg de zanahorias, 3kg de papa y 2kg de cebolla.
+                            <span class="message-time">10:35 AM</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="chat-input-container">
+                    <input type="text" class="chat-input" id="chatInput" placeholder="Escribe tu mensaje...">
+                    <button class="send-btn" id="sendBtn">
+                        <i class="fas fa-paper-plane send-icon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Llamado a la acción -->
+    <section class="cta" id="unete">
+        <div class="cta-shape"></div>
+        <div class="container">
+            <div class="cta-content">
+                <h2 class="cta-title animate animate-fade-in-up">¿Listo para unirte a nuestra red?</h2>
+                <p class="cta-text animate animate-fade-in-up delay-1">Regístrate ahora y comienza a disfrutar de todos los beneficios de Nexo Nutritivo</p>
+                <div class="cta-buttons animate animate-fade-in-up delay-2">
+                    <a href="#" class="btn btn-lg btn-accent">
+                        <i class="fas fa-utensils btn-icon"></i> Registrarme como Familia
+                    </a>
+                    <a href="#" class="btn btn-lg btn-secondary">
+                        <i class="fas fa-truck btn-icon"></i> Ser Productor/Transportista
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pie de página -->
+    <footer class="footer" id="contacto">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <a href="#" class="footer-logo">
+                        <i class="fas fa-leaf"></i> Nexo Nutritivo
+                    </a>
+                    <p class="footer-text">
+                        Conectando agricultores, transportistas y comunidades para combatir la anemia en el Perú.
+                    </p>
+                    <div class="footer-social">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-col">
+                    <h3 class="footer-title">Enlaces Rápidos</h3>
+                    <ul class="footer-links">
+                        <li><a href="#inicio">Inicio</a></li>
+                        <li><a href="#beneficios">Beneficios</a></li>
+                        <li><a href="#seguimiento">Seguimiento</a></li>
+                        <li><a href="#testimonios">Testimonios</a></li>
+                        <li><a href="#equipo">Equipo</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-col">
+                    <h3 class="footer-title">Para Usuarios</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Cómo funciona</a></li>
+                        <li><a href="#">Preguntas frecuentes</a></li>
+                        <li><a href="#">Registrarse</a></li>
+                        <li><a href="#">Iniciar sesión</a></li>
+                        <li><a href="#">Centro de ayuda</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-col">
+                    <h3 class="footer-title">Contacto</h3>
+                    <ul class="footer-links">
+                        <li><i class="fas fa-map-marker-alt"></i> Lima, Perú</li>
+                        <li><i class="fas fa-phone"></i> +51 987 654 321</li>
+                        <li><i class="fas fa-envelope"></i> info@nexonutritivo.com</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 Nexo Nutritivo. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts - 1,500 líneas -->
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script>
+        // Barra de navegación fija al hacer scroll
+        window.addEventListener('scroll', function() {
+            if (window.scrollY > 100) {
+                document.getElementById('header').classList.add('scrolled');
+            } else {
+                document.getElementById('header').classList.remove('scrolled');
+            }
+        });
+
+        // Menú móvil
+        document.getElementById('mobileMenuBtn').addEventListener('click', function() {
+            document.getElementById('navbarNav').classList.toggle('active');
+            this.innerHTML = this.innerHTML.includes('times') ? 
+                '<i class="fas fa-bars"></i>' : '<i class="fas fa-times"></i>';
+        });
+
+        // Cerrar menú al hacer clic en un enlace
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function() {
+                document.getElementById('navbarNav').classList.remove('active');
+                document.getElementById('mobileMenuBtn').innerHTML = '<i class="fas fa-bars"></i>';
+            });
+        });
+
+        // Mapa interactivo
+        function initMap() {
+            const map = L.map('tracking-map').setView([-12.0464, -77.0428], 12);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+            
+            // Marcadores de ejemplo
+            const producerIcon = L.icon({
+                iconUrl: 'https://cdn-icons-png.flaticon.com/512/3069/3069172.png',
+                iconSize: [40, 40],
+                iconAnchor: [20, 40],
+                popupAnchor: [0, -40]
+            });
+            
+            const transporterIcon = L.icon({
+                iconUrl: 'https://cdn-icons-png.flaticon.com/512/3076/3076125.png',
+                iconSize: [40, 40],
+                iconAnchor: [20, 40],
+                popupAnchor: [0, -40]
+            });
+            
+            const communityIcon = L.icon({
+                iconUrl: 'https://cdn-icons-png.flaticon.com/512/3079/3079158.png',
+                iconSize: [40, 40],
+                iconAnchor: [20, 40],
+                popupAnchor: [0, -40]
+            });
+            
+            // Marcadores de ejemplo
+            const producerMarker = L.marker([-12.1565, -76.9649], { icon: producerIcon }).addTo(map)
+                .bindPopup('<b>Productor:</b> Juan Pérez<br><b>Productos:</b> Zanahorias, Papas, Cebollas');
+            
+            const transporterMarker = L.marker([-12.1, -77.0], { icon: transporterIcon }).addTo(map)
+                .bindPopup('<b>Transportista:</b> Carlos Ramírez<br><b>Vehículo:</b> Camión Refrigerado');
+            
+            const communityMarker = L.marker([-12.0164, -77.0428], { icon: communityIcon }).addTo(map)
+                .bindPopup('<b>Olla Común:</b> María López<br><b>Ubicación:</b> SJL');
+            
+            // Ruta de ejemplo
+            const route = L.polyline([
+                [-12.1565, -76.9649],
+                [-12.1, -77.0],
+                [-12.0164, -77.0428]
+            ], { color: '#2A9D8F', weight: 5 }).addTo(map);
+            
+            // Animación del transporte
+            let transporterPosition = 0;
+            const routePoints = route.getLatLngs();
+            const numPoints = routePoints.length;
+            
+            function animateTransporter() {
+                if (transporterPosition >= numPoints - 1) {
+                    transporterPosition = 0;
+                } else {
+                    transporterPosition += 0.01;
+                }
+                
+                const pointIndex = Math.floor(transporterPosition);
+                const fraction = transporterPosition - pointIndex;
+                
+                if (pointIndex < numPoints - 1) {
+                    const lat = routePoints[pointIndex].lat + 
+                        (routePoints[pointIndex + 1].lat - routePoints[pointIndex].lat) * fraction;
+                    const lng = routePoints[pointIndex].lng + 
+                        (routePoints[pointIndex + 1].lng - routePoints[pointIndex].lng) * fraction;
+                    
+                    transporterMarker.setLatLng([lat, lng]);
+                    
+                    // Actualizar información de seguimiento
+                    if (pointIndex < numPoints / 3) {
+                        document.getElementById('statusText').textContent = 'Recogiendo productos';
+                    } else if (pointIndex < (2 * numPoints) / 3) {
+                        document.getElementById('statusText').textContent = 'En camino';
+                    } else {
+                        document.getElementById('statusText').textContent = 'Cerca del destino';
+                    }
+                }
+                
+                requestAnimationFrame(animateTransporter);
+            }
+            
+            animateTransporter();
+        }
+        
+        // Inicializar el mapa cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', initMap);
+        
+        // Sistema de seguimiento
+        document.getElementById('trackBtn').addEventListener('click', function() {
+            const trackingCode = document.getElementById('trackingCode').value;
+            
+            if (trackingCode) {
+                document.getElementById('trackingResult').classList.add('active');
+                
+                // Simular datos de seguimiento
+                const producers = ['Juan Pérez (Cañete)', 'María Gómez (Ica)', 'Carlos Mendoza (Chincha)'];
+                const transporters = ['Carlos Ramírez', 'Luis Fernández', 'Miguel Torres'];
+                const products = ['Zanahorias, Papas, Cebollas', 'Manzanas, Peras, Plátanos', 'Pollo, Huevos, Lechuga'];
+                const arrivals = ['2 horas (12:30 PM)', '4 horas (2:15 PM)', '1 día (Mañana)'];
+                
+                // Seleccionar aleatoriamente
+                const randomIndex = Math.floor(Math.random() * producers.length);
+                
+                document.getElementById('producerText').textContent = producers[randomIndex];
+                document.getElementById('transporterText').textContent = transporters[randomIndex];
+                document.getElementById('productsText').textContent = products[randomIndex];
+                document.getElementById('arrivalText').textContent = arrivals[randomIndex];
+            }
+        });
+        
+        // Sistema de chat
+        document.getElementById('sendBtn').addEventListener('click', function() {
+            const chatInput = document.getElementById('chatInput');
+            const chatMessages = document.getElementById('chatMessages');
+            
+            if (chatInput.value.trim() !== '') {
+                // Crear nuevo mensaje enviado
+                const newMessage = document.createElement('div');
+                newMessage.className = 'message sent';
+                newMessage.innerHTML = `
+                    <div class="message-content">
+                        ${chatInput.value}
+                        <span class="message-time">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                    </div>
+                `;
+                
+                chatMessages.appendChild(newMessage);
+                
+                // Limpiar input
+                chatInput.value = '';
+                
+                // Scroll al final
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                
+                // Simular respuesta después de 1-3 segundos
+                setTimeout(() => {
+                    const responses = [
+                        'Gracias por tu mensaje, estamos verificando tu pedido.',
+                        'Tu pedido está en camino, llegará pronto.',
+                        '¿En qué más podemos ayudarte?',
+                        'Hemos registrado tu consulta, te responderemos pronto.'
+                    ];
+                    
+                    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                    
+                    const replyMessage = document.createElement('div');
+                    replyMessage.className = 'message received';
+                    replyMessage.innerHTML = `
+                        <div class="message-content">
+                            ${randomResponse}
+                            <span class="message-time">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                        </div>
+                    `;
+                    
+                    chatMessages.appendChild(replyMessage);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }, 1000 + Math.random() * 2000);
+            }
+        });
+        
+        // Permitir enviar mensaje con Enter
+        document.getElementById('chatInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('sendBtn').click();
+            }
+        });
+        
+        // Animaciones al hacer scroll
+        const animateElements = document.querySelectorAll('.animate');
+        
+        function checkScroll() {
+            animateElements.forEach(element => {
+                const elementTop = element.getBoundingClientRect().top;
+                const windowHeight = window.innerHeight;
+                
+                if (elementTop < windowHeight - 100) {
+                    element.style.opacity = 1;
+                }
+            });
+        }
+        
+        window.addEventListener('scroll', checkScroll);
+        window.addEventListener('load', checkScroll);
+    </script>
+</body>
+</html>
